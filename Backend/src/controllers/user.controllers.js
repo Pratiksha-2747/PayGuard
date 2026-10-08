@@ -4,12 +4,21 @@ import { User } from "../models/user.model.js";
 import { Wallet } from "../models/wallet.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import JWT from "jsonwebtoken";
+import { validatePasswordStrength } from "../utils/passwordValidator.js";
+import crypto from "node:crypto";
+import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 
 const register = asyncHandler(async (req, res) => {
     const { username, email, fullName, mobileNum, password } = req.body
 
     if (!username || !email || !fullName || !mobileNum || !password) {
         throw new ApiError(400, "All fields are required")
+    }
+
+    const passwordValidation = validatePasswordStrength(password, username, email)
+    if (!passwordValidation.isValid) {
+        throw new ApiError(400, passwordValidation.errors.join(", "))
     }
 
     const existingUser = await User.findOne({
@@ -80,6 +89,10 @@ const login = asyncHandler(async (req, res) => {
 
     if (!isPasswordValid) {
         throw new ApiError(401, "Invalid user credentials")
+    }
+
+    if (!user.isActive) {
+        throw new ApiError(403, "Account is deactivated. Contact support.")
     }
 
     const accessToken = user.generateAccessToken()
@@ -171,4 +184,128 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
-export { register, login, logout, refreshAccessToken }
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "User fetched successfully"))
+})
+
+const getUserByIdentifier = asyncHandler(async (req, res) => {
+    const { identifier } = req.params
+
+    const user = await User.findOne({
+        $or: [
+            { username: identifier },
+            { email: identifier }
+        ]
+    }).select("_id username email fullName")
+
+    if (!user) {
+        throw new ApiError(404, "User not found")
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User found"))
+})
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body
+
+    if (!email) {
+        throw new ApiError(400, "Email is required")
+    }
+
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        return res
+            .status(200)
+            .json(new ApiResponse(200, {}, "If the email exists, a reset link has been sent"))
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex")
+    const hashedToken = await bcrypt.hash(resetToken, 10)
+
+    user.passwordResetToken = hashedToken
+    user.passwordResetExpiry = new Date(Date.now() + 15 * 60 * 1000)
+    await user.save()
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        }
+    })
+
+    const resetUrl = `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/reset-password/${resetToken}`
+
+    const mailOptions = {
+        from: process.env.SMTP_FROM,
+        to: user.email,
+        subject: "Password Reset Request",
+        html: `
+            <h1>Password Reset Request</h1>
+            <p>You requested a password reset for your PayGuard account.</p>
+            <p>Click the link below to reset your password:</p>
+            <a href="${resetUrl}">${resetUrl}</a>
+            <p>This link will expire in 15 minutes.</p>
+            <p>If you did not request this, please ignore this email.</p>
+        `
+    }
+
+    try {
+        await transporter.sendMail(mailOptions)
+    } catch (error) {
+        console.error("Error sending email:", error)
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "If the email exists, a reset link has been sent"))
+})
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { token } = req.params
+    const { password } = req.body
+
+    if (!password) {
+        throw new ApiError(400, "Password is required")
+    }
+
+    const users = await User.find({
+        passwordResetToken: { $exists: true },
+        passwordResetExpiry: { $gt: new Date() }
+    })
+
+    let user = null
+    for (const u of users) {
+        const isMatch = await bcrypt.compare(token, u.passwordResetToken)
+        if (isMatch) {
+            user = u
+            break
+        }
+    }
+
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired reset token")
+    }
+
+    const passwordValidation = validatePasswordStrength(password, user.username, user.email)
+    if (!passwordValidation.isValid) {
+        throw new ApiError(400, passwordValidation.errors.join(", "))
+    }
+
+    user.password = password
+    user.passwordResetToken = undefined
+    user.passwordResetExpiry = undefined
+    await user.save()
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Password reset successfully"))
+})
+
+export { register, login, logout, refreshAccessToken, getCurrentUser, getUserByIdentifier, forgotPassword, resetPassword }

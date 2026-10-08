@@ -1,0 +1,196 @@
+.transactions-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.transactions-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+}
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.transactions-header h1 {
+  margin: 0;
+  color: #333;
+}
+
+.back-btn {
+  width: auto;
+  padding: 0.5rem 1rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.back-btn:hover {
+  background: #4b5563;
+}
+
+.transactions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transaction-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: white;
+}
+
+.transaction-item.success {
+  border-left: 4px solid #10b981;
+}
+
+.transaction-item.failed {
+  border-left: 4px solid #ef4444;
+}
+
+.transaction-item.pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.transaction-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.transaction-left {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.transaction-type {
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.transaction-amount {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.transaction-amount.credit {
+  color: #10b981;
+}
+
+.transaction-amount.debit {
+  color: #ef4444;
+}
+
+.transaction-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.transaction-status {
+  text-transform: capitalize;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.transaction-status.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.transaction-status.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.transaction-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.transfer-details {
+  display: flex;
+  gap: 2rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.failure-reason {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: auto;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.pagination-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.no-transactions {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}

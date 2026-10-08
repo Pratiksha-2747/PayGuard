@@ -1,0 +1,42 @@
+@import './Form.css';
+
+.recipient-search {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.recipient-search input {
+  flex: 1;
+}
+
+.search-btn {
+  width: auto;
+  padding: 0.75rem 1rem;
+  background: #3b82f6;
+}
+
+.search-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.search-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.recipient-info {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.recipient-info p {
+  margin: 0.5rem 0;
+  color: #0369a1;
+}
+
+.recipient-info strong {
+  color: #0c4a6e;
+}

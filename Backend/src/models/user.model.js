@@ -41,6 +41,12 @@ const userSchema = new Schema({
     refreshToken: {
         type: String
     },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpiry: {
+        type: Date
+    },
     isActive: {
         type: Boolean,
         default: true
